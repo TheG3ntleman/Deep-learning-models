@@ -1,23 +1,27 @@
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+#importing required libraries
 
 mnist = input_data.read_data_sets('tmp/data', one_hot=True)
+#Downloading and extracting MNIST dataset
 
-output_classes = 10
+output_classes = 10 #Defining number of classes
 
-train = True
-
+#Setting model hyperparameters
 training_iterations = 5
 learning_rate = 0.001
 batchsize = 100
 
+#Adding conv2d layer function for simplicity
 def conv2d(x, w, b, strides=1):
     conv = tf.nn.conv2d(x, filter=w, strides=[1, strides, strides, 1], padding="SAME")
     return tf.nn.bias_add(conv, b)
 
+#Adding maxpooling2d layer function for simplicity
 def maxpooling2D(x, k=2):
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1],padding='SAME')
 
+#Defining convolutional model function
 def convnet(x, weights, biases):
 
     x = tf.reshape(x, [-1, 28, 28, 1])
@@ -52,10 +56,10 @@ def convnet(x, weights, biases):
 
     return tf.add(tf.matmul(dense1, weights['wd2']), biases['wd2'])
 
-
+#Setting up weights and biases for the model
 weights = {
 
-    'wc1': tf.Variable(tf.random_normal(shape=[3, 3, 1, 32])),
+    'wc1': tf.Variable(tf.random_normal(shape=[3, 3, 1, 32])),#[filter size, filter_size, inputs, outputs]
     'wc2': tf.Variable(tf.random_normal(shape=[3, 3, 32, 64])),
     'wc3': tf.Variable(tf.random_normal(shape=[3, 3, 64, 128])),
     'wc4': tf.Variable(tf.random_normal(shape=[3, 3, 128, 256])),
@@ -78,9 +82,11 @@ biases = {
 }
 
 
+#Graph inputs
 X = tf.placeholder(tf.float32)
 Y = tf.placeholder(tf.float32)
 
+#setting up training mechanism
 pred = convnet(X, weights, biases)
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=Y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
@@ -89,7 +95,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-
+#Training model
 with tf.Session() as sess:
     sess.run(init)
     for step in range(1, training_iterations+1):
