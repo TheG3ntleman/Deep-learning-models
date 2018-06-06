@@ -1,24 +1,37 @@
-import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
-import numpy as np
-import matplotlib.pyplot as plt
+"""
+    I was thinking on new ways to make completely new data then I came up with this.
+    I could have a classifier model and a generator model. The classifier model would be trained first
+    and would clasiifiy the input images into classed then the generator network would take the probability
+    vector (softmax on the output of the classifier) and generate the image based on it. Later we could create our
+    own probability vectors and generate new images.
+"""
+
+import tensorflow as tf #Tensorflow to build the model
+from tensorflow.examples.tutorials.mnist import input_data #to use the MNIST dataset
+import numpy as np #used in the testing process to reshape numpy arrays
+import matplotlib.pyplot as plt #used to plot output when testing
+#Required libraries imported
 
 mnist = input_data.read_data_sets('tmp/data', one_hot=True)
+#downloading and extracting data
 
-input_size = 784
-num_classes = 10
-latent_space = num_classes
+input_size = 784 #classifier input size
+num_classes = 10 #number of classes
+latent_space = num_classes #in this model the latent space size is equal to the number of classes
 
-session_savepath = 'model/model'
+session_savepath = 'model/model' #path to save the model
 
+#classifier hyperparameters
 classifier_learningrate = 0.005
 classifier_training_iterations = 20
 classifier_batch_size = 100
 
+#generator hyperparameters
 generator_learningrate = 0.01
 generator_training_iterations = 10
 generator_batch_size = 55
 
+#training bools
 train_classifier_ = False
 train_generator_ = False
 test_model = True
@@ -66,26 +79,30 @@ def generator(X):
 
     return output_layer
 
+#models set up
+
 classifier_vars = [classifier_weights['inputlayer'], classifier_weights['hiddenlayer'], classifier_weights['outputlayer'],
                    classifier_biases['inputlayer'], classifier_biases['hiddenlayer'], classifier_biases['outputlayer']]
 
 generator_vars = [generator_weights['i1'], generator_weights['h1'], generator_weights['o1'],
                    generator_biases['i1'], generator_biases['h1'], generator_biases['o1']]
 
-X = tf.placeholder(tf.float32, [None, input_size])
+# seperated generator and classifier variables for the training process
+
+X = tf.placeholder(tf.float32, [None, input_size]) # graph inputs
 Y = tf.placeholder(tf.float32, [None, num_classes])
 
-classifier_logits = classifier(X)
-classifier_prediction = tf.nn.softmax(classifier_logits)
+classifier_logits = classifier(X) #getting output from classifier
+classifier_prediction = tf.nn.softmax(classifier_logits) #obtaining probability vector
 classifier_loss_fn = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=classifier_logits,
-                                                                       labels=Y))
-classifier_training_fn = tf.train.GradientDescentOptimizer(classifier_learningrate).minimize(classifier_loss_fn, var_list=classifier_vars)
+                                                                       labels=Y)) # loss function for the classifier
+classifier_training_fn = tf.train.GradientDescentOptimizer(classifier_learningrate).minimize(classifier_loss_fn, var_list=classifier_vars) # function to train classifier
 classifier_correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(classifier_prediction, 1))
-classifier_accuracy = tf.reduce_mean(tf.cast(classifier_correct_prediction, tf.float32))
+classifier_accuracy = tf.reduce_mean(tf.cast(classifier_correct_prediction, tf.float32)) #measuring classifier accuracy
 
-generator_output = generator(classifier_prediction)
-generator_loss_fn = tf.reduce_mean(tf.pow(X - generator_output, 2))
-generator_training_fn = tf.train.RMSPropOptimizer(generator_learningrate).minimize(generator_loss_fn, var_list=generator_vars)
+generator_output = generator(classifier_prediction) #obtaining generator outputs
+generator_loss_fn = tf.reduce_mean(tf.pow(X - generator_output, 2)) #lsoss function for generator
+generator_training_fn = tf.train.RMSPropOptimizer(generator_learningrate).minimize(generator_loss_fn, var_list=generator_vars) #train function for generator
 
 saver = tf.train.Saver()
 
