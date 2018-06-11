@@ -17,7 +17,9 @@ summarypath = '/Users/sriabhirath/Desktop/PythonProjs/CombinedRNN/SessionSummary
 def base_model(X, weights, biases):
     with tf.name_scope('BaseModel') as scope:
         i1 = tf.nn.tanh(tf.add(tf.matmul(X, weights['i1']), biases['i1']))
+        i1 = tf.nn.dropout(i1, 0.8)
         h1 = tf.nn.tanh(tf.add(tf.matmul(i1, weights['h1']), biases['h1']))
+        h1 = tf.nn.dropout(h1, 0.5)
         o1 = tf.nn.tanh(tf.add(tf.matmul(h1, weights['o1']), biases['o1']))
 
     return o1
@@ -41,7 +43,7 @@ biases_base_input = {
     'o1': tf.Variable(tf.random_normal([input_size]))
 }
 weights_base = {
-    'i1': tf.Variable(tf.random_normal([input_size*2, 300])),
+    'i1': tf.Variable(tf.random_normal([input_size*2, 300])),#Meant to be input_size *2
     'h1': tf.Variable(tf.random_normal([300, 100])),
     'o1': tf.Variable(tf.random_normal([100, classes]))
 }
@@ -148,7 +150,7 @@ with tf.Session() as sess:
             mean_accuracy = (mean_accuracy * number_of_iters + acc)/(number_of_iters+1)
 
             print("########################################################################################")
-            print("Step:", step, "Batch:", batch,",Classifier Loss:", classifier_lss, ",Model Accuracy:", acc, "Mean Accuracy:", mean_accuracy)
+            print("Step:", step, "Batch:", batch, "MemoryNetLoss:", mem_loss, ",Classifier Loss:", classifier_lss, ",Model Accuracy:", acc, "Mean Accuracy:", mean_accuracy)
 
             summary_str = sess.run(merged_summary_op, feed_dict={x: X, y: Y})
 
