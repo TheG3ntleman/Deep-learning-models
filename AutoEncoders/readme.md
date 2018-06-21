@@ -4,6 +4,7 @@ AUtoencoders are unsupervised deep learning models. They take in the features ou
 
 Learning Resources:
     - http://ufldl.stanford.edu/tutorial/unsupervised/Autoencoders/
+    -
 
 ## Reconstructive Auto Encoders
 1] [Basic autoencoder](https://github.com/TheG3ntleman/Deep-learning-models/blob/master/AutoEncoders/Autoencoder.py): A simple 
